@@ -1,10 +1,8 @@
 import argparse
 import json
-from Bio import SeqIO, Phylo, Seq
-from string import digits
+from Bio import SeqIO
 import pandas as pd
-from collections import defaultdict, Counter
-import matplotlib.pyplot as plt
+from collections import Counter
 
 
 #Translation Matrix 
@@ -86,8 +84,6 @@ def possible_syn_mut_locations(reference):
                         synonymous_possibilities += synonymous-1 
                         nonsynonymous = 9 - len(entry)-1
                         nonsynonymous_possibilities += nonsynonymous
-
-    nonsyn_ratio = nonsynonymous_possibilities/(nonsynonymous_possibilities+synonymous_possibilities)
     syn_ratio = synonymous_possibilities/(nonsynonymous_possibilities+synonymous_possibilities)
     return(syn_ratio)
 
@@ -98,16 +94,11 @@ ref_file = "data/areference.gbk"
 syn_ratio = possible_syn_mut_locations(ref_file)
 
 
-print("\n","syn  fractions")
-print(syn_ratio)
-
-print("\n","scaled by syn ratio")
-
 def scaled_by_ratio(dataframe, ratio):
+    """dataframe scaled by a given ratio"""
     scaled = dataframe.divide(ratio)
     scaled = scaled.fillna(0)
     return(scaled)
-
 print("\n", "ratio of nt", "\n")
 
 def count_of_nucleotides_in_syn_positions(reference):
@@ -130,24 +121,19 @@ def count_of_nucleotides_in_syn_positions(reference):
     counter = Counter(list_all)
     return(counter)
 
+def scaled_by_nucleotides_and_normalized(dataframe, nucl_dict):
+    """scaling dataframe by nucleotides at synonymous positions in reference"""
+    total = 0
+    nuc = ["A", "C", "G", "T"]
+    for i in nucl_dict.values(): total += i
 
-total = 0
-for i in counter.values(): total += i
+    df_ratios = pd.DataFrame.from_dict(nucl_dict, orient='index').astype(int).T
+    df_ratios = df_ratios.divide(total)
+    for n in nuc: dataframe.loc[[n]] = dataframe.loc[[n]].div(float(df_ratios[n]))
 
-df_ratios = pd.DataFrame.from_dict(counter, orient='index').astype(int).T
-df_ratios = df_ratios.divide(total)
-print(df_ratios)
+    #normalizing step
+    sum_ = dataframe.to_numpy().sum()
+    scaled_and_normalized = dataframe.divide(sum_)
+    return(scaled_and_normalized)
 
-nuc = ["A", "C", "G", "T"]
-for n in nuc:
-    scaled.loc[[n]] = scaled.loc[[n]].div(float(df_ratios[n]))
 
-print(scaled)
-
-print("\n", "normalized and scaled matrix")
-
-sum_ = scaled.to_numpy().sum()
-print("sum of all:",  sum_, "\n")
-
-scaled_and_normalized = scaled.divide(sum_)
-print(scaled_and_normalized)
