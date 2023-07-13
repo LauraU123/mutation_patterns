@@ -14,7 +14,7 @@ rule scaled_matrix:
         scaled_matrix = "results/{location}_matrix.csv"
     shell:
         """
-        python3 scripts/constructing-matrices.py
+        python3 scripts/constructing-matrices.py \
         --ref {input.ref} \
         --tree {input.tree} \
         --output {output.scaled_matrix}
@@ -29,7 +29,7 @@ rule graph_construction:
         "results/{location}_graph.png"
     shell:
         """
-        python3 graph.py
+        python3 graph.py \
         --input {input} \
         --output {output}
         """
