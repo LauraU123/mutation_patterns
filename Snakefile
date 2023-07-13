@@ -1,4 +1,4 @@
-LOCATIONS = ["point_mut", "one_before"]
+LOCATIONS = ["point_mut", "one_before", "one_after", "before_after"]
 
 rule all:
     input:

@@ -53,14 +53,18 @@ def mutations_matrix_unscaled(synonymous, type_):
                     mut_by_branch_CDS[branch].append(mut)
 
     if type_ != "point_mut":
-
         aligned_for_tree = SeqIO.parse("data/reconstructed_sequences.fasta", "fasta")
         for entry in aligned_for_tree:
             for i in mut_by_branch_CDS[entry.id]:
                 location_of_interest = int(i[1:-1])
-                #dinucleotide_and_mut = entry.seq[location_of_interest-2] + f'{i[0]}{i[-1]}'
-                if entry.seq[location_of_interest-2] != '-':
-                    all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}'].append(i[-1])
+                if type_ == "one_before":
+                    if entry.seq[location_of_interest-2] != '-':
+                        all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}'].append(i[-1])
+                elif type_ == "one_after":
+                    if entry.seq[location_of_interest+1] != '-': all_dinucleotides[f'{i[0]}{entry.seq[location_of_interest+1]}'].append(i[-1])
+                elif type_ == "before_after":
+                    if entry.seq[location_of_interest+1] != '-' and entry.seq[location_of_interest-2] != '-': all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}{entry.seq[location_of_interest+1]}'].append(i[-1])
+
         with_counters = dict()
         for type, mut in all_dinucleotides.items():
             with_counters[type] = Counter(mut)
@@ -140,12 +144,25 @@ def count_of_nucleotides_in_syn_positions(reference, type_):
                                 list_all.append(codon[0])
                                 list_all.append(codon[0])
                             elif len(entry) == 1: continue
-                        else:
+                        elif type_ == "one_before":
                             if 1< len(entry) <= 4: list_all.append(str(codon[1:]))
                             elif len(entry) > 4:
                                 list_all.append(str(sequence[i-1:i+1]))
                                 list_all.append(str(codon[1:]))
                             elif len(entry) == 1: continue
+                        elif type_ == "one_after":
+                            if 1< len(entry) <= 4: list_all.append(str(sequence[i+2:i+4]))
+                            elif len(entry) > 4:
+                                list_all.append(str(codon[:-1]))
+                                list_all.append(str(sequence[i+2:i+4]))
+                            elif len(entry) == 1: continue
+                        elif type_ == "before_after":
+                            if 1< len(entry) <= 4: list_all.append(str(sequence[i+1:i+4]))
+                            elif len(entry) > 4:
+                                list_all.append(str(sequence[i-1:i+2]))
+                                list_all.append(str(sequence[i+1:i+4]))
+                            elif len(entry) == 1: continue
+
     counter = Counter(list_all)
     return(counter)
 
@@ -166,6 +183,7 @@ def scaled_by_nucleotides_and_normalized(dataframe, nucl_dict, type_):
 
     df_ratios = pd.DataFrame.from_dict(nucl_dict, orient='index').astype(int).T
     df_ratios = df_ratios.divide(total)
+    print(df_ratios)
     for n in nuc: dataframe.loc[[n]] = dataframe.loc[[n]].div(float(df_ratios[n]))
 
     #normalizing step
@@ -197,6 +215,7 @@ if __name__=="__main__":
     scaled_by_ratio_ = scaled_by_ratio(mutation_matrix, syn_ratio)
 
     syn_mut_count_reference = count_of_nucleotides_in_syn_positions(args.ref, args.type)
+    print(syn_mut_count_reference)
 
     scaled_normalized = scaled_by_nucleotides_and_normalized(scaled_by_ratio_, syn_mut_count_reference, args.type)
 

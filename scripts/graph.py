@@ -53,6 +53,7 @@ def finding_duplications(nwktree, reconstructeddupl, which):
 
 def dictionary_of_mutations(duplication, mutation_matrix, type_):
     sum_of_rows = mutation_matrix.sum(axis = 1)
+    print(sum_of_rows)
     translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
     each_position = dict()
     if type_ == "point_mut":
@@ -74,22 +75,57 @@ def dictionary_of_mutations(duplication, mutation_matrix, type_):
                                         each_position[i] = sum_
     else:
         for i, char in enumerate(duplication):
-            if i%3 == 0 and i !=0:
+            if i%3 == 0 and i !=0 :
                 codon_plus_prev = str(duplication[i-1:i+3])
+                codon_plus_after = str(duplication[i:i+4])
+                codon_plus_both = str(duplication[i-1:i+4])
                 codon = str(duplication[i:i+3])
-                for key, entry in translations.items():
-                    if codon in entry:
-                            if len(entry) == 4: each_position[i+2] = sum_of_rows[codon[1:]]
-                            if len(entry) == 2 or len(entry) == 3:
-                                sum_of_muts = 0
-                                for ele in entry: sum_of_muts += mutation_matrix.at[codon[1:], ele[-1]]
-                                each_position[i+2] = sum_of_muts
-                            if len(entry) == 6:
-                                each_position[i+2] = sum_of_rows[codon[1:]]
-                                for ele in entry:
-                                    if ele[0] != codon[0]:
-                                        sum_ = float(mutation_matrix.at[codon_plus_prev[:2], ele[0]])
-                                        each_position[i] = sum_
+                if type_ == "one_before":
+                    for key, entry in translations.items():
+                        if codon in entry:
+                                if len(entry) == 4: each_position[i+2] = sum_of_rows[codon[1:]]
+                                if len(entry) == 2 or len(entry) == 3:
+                                    sum_of_muts = 0
+                                    for ele in entry: sum_of_muts += mutation_matrix.at[codon[1:], ele[-1]]
+                                    each_position[i+2] = sum_of_muts
+                                if len(entry) == 6:
+                                    each_position[i+2] = sum_of_rows[codon[1:]]
+                                    for ele in entry:
+                                        if ele[0] != codon[0]:
+                                            sum_ = float(mutation_matrix.at[codon_plus_prev[:2], ele[0]])
+                                            each_position[i] = sum_
+                elif type_ == "one_after" and len(codon_plus_after)==4:
+                    for key, entry in translations.items():
+                        if codon in entry:
+                                if len(entry) == 4:  
+                                    each_position[i+2] = sum_of_rows[codon_plus_after[2:]]
+                                if len(entry) == 2 or len(entry) == 3:
+                                    sum_of_muts = 0
+                                    for ele in entry: sum_of_muts += mutation_matrix.at[codon_plus_after[2:], ele[-1]]
+                                    each_position[i+2] = sum_of_muts
+                                if len(entry) == 6:
+                                    each_position[i+2] = sum_of_rows[codon_plus_after[2:]]
+                                    for ele in entry:
+                                        if ele[0] != codon[0]:
+                                            sum_ = float(mutation_matrix.at[codon_plus_after[:-2], ele[0]])
+                                            each_position[i] = sum_
+                                            
+                elif type_ == "before_after" and len(codon_plus_both)==5:
+                    for key, entry in translations.items():
+                        if codon in entry:
+                                if len(entry) == 4: 
+                                    each_position[i+2] = sum_of_rows[codon_plus_both[2:]]
+                                if len(entry) == 2 or len(entry) == 3:
+                                    sum_of_muts = 0
+                                    for ele in entry: sum_of_muts += mutation_matrix.at[codon_plus_both[2:], ele[-1]]
+                                    each_position[i+2] = sum_of_muts
+                                if len(entry) == 6:
+                                    each_position[i+2] = sum_of_rows[codon_plus_both[2:]]
+                                    for ele in entry:
+                                        if ele[0] != codon[0]:
+                                            sum_ = float(mutation_matrix.at[codon_plus_both[:-2], ele[0]])
+                                            each_position[i] = sum_
+
     cumulative_= cumulative(each_position)
     return(cumulative_)
 
@@ -118,6 +154,8 @@ if __name__=="__main__":
     cumulative_1 = dictionary_of_mutations(post_1, mut_matrix, args.type)
     cumulative_2 = dictionary_of_mutations(post_2, mut_matrix, args.type)
     cumulative_pre = dictionary_of_mutations(pre, mut_matrix, args.type)
+    print(cumulative_pre)
+    print(cumulative_2)
 
     plt.step(cumulative_1.keys(), cumulative_1.values(), label= f'1st copy postduplication', where='post')
     plt.step(cumulative_2.keys(), cumulative_2.values(), label=f'2nd copy postduplication', where='post' )
