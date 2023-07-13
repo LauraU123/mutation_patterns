@@ -48,8 +48,6 @@ def finding_duplications(nwktree, reconstructeddupl, which):
     if which == "pre": return(predupl_sequence)
 
 
-translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
-
 
 def dictionary_of_mutations(duplication, mutation_matrix):
     sum_of_rows = mutation_matrix.sum(axis = 1)
@@ -89,6 +87,7 @@ if __name__=="__main__":
     args = parser.parse_args()
 
     mut_matrix = pd.read_csv(args.matrix)
+    mut_matrix = mut_matrix.set_index('Unnamed: 0')
 
     post_1 = finding_duplications(args.tree, args.duplicationseq, "1")    
     post_2 = finding_duplications(args.tree, args.duplicationseq, "2")   
@@ -106,5 +105,3 @@ if __name__=="__main__":
     plt.xlabel("gene location")
     plt.ylabel("cumulative sum of mutations")
     plt.savefig(args.output)
-
-

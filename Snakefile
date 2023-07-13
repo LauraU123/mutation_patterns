@@ -24,12 +24,18 @@ rule graph_construction:
     message:
         """Constructing graphs"""
     input:
-        rules.scaled_matrix.output
+        matrix = rules.scaled_matrix.output,
+        ref = rules.scaled_matrix.input.ref,
+        duplicationseq = "data/last_reconstruction.fasta",
+        tree = "data/a_tree.nwk"
     output:
         "results/{location}_graph.png"
     shell:
         """
-        python3 graph.py \
-        --input {input} \
-        --output {output}
+        python3 scripts/graph.py \
+        --matrix {input.matrix} \
+        --output {output} \
+        --tree {input.tree} \
+        --ref {input.ref} \
+        --duplicationseq {input.duplicationseq}
         """
