@@ -7,7 +7,6 @@ from collections import OrderedDict
 import numpy as np
 
 
-
 def cumulative(dictionary):
     """
     Returns cumulative values for each element of an ordered dictionary
@@ -21,11 +20,6 @@ def cumulative(dictionary):
     for i, j in zip(od.keys(), res): 
         cumul[i] = j
     return(cumul)
-
-
-
-
-sum_of_rows = scaled_and_normalized.sum(axis = 1)
 
 
 def finding_duplications(nwktree, reconstructeddupl, which):
@@ -58,6 +52,7 @@ translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'T
 
 
 def dictionary_of_mutations(duplication, mutation_matrix):
+    sum_of_rows = mutation_matrix.sum(axis = 1)
     translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
     each_position = dict()
     for i, char in enumerate(duplication):
@@ -80,13 +75,36 @@ def dictionary_of_mutations(duplication, mutation_matrix):
     return(cumulative_)
 
 
-plt.step(cumulative_1.keys(), cumulative_1.values(), label= f'1st copy postduplication', where='post')
-plt.step(cumulative_2.keys(), cumulative_2.values(), label=f'2nd copy postduplication', where='post' )
-plt.step(cumulative_pre.keys(), cumulative_pre.values(), label= f'preduplication', where='post' )
-plt.legend(loc='lower right')
-plt.suptitle('Expected Synonymous Mutations in RSV-A')
-plt.xlabel("gene location")
-plt.ylabel("cumulative sum of mutations")
-plt.savefig("expected_synonymous.png")
+if __name__=="__main__":
+    parser = argparse.ArgumentParser(
+        description="Construct synynymous mutation matrix",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    
+    parser.add_argument('--matrix', required=True, type=str, help="csv file with scaled gene mutations")
+    parser.add_argument('--tree', required=True, type=str, help="Tree nwk")
+    parser.add_argument('--ref', type=str, help="genbank reference file")
+    parser.add_argument('--output', type=str, help="graph png file")
+    parser.add_argument('--duplicationseq', required=True, help="fasta file with reconstructed sequences")
+
+    args = parser.parse_args()
+
+    mut_matrix = pd.read_csv(args.matrix)
+
+    post_1 = finding_duplications(args.tree, args.duplicationseq, "1")    
+    post_2 = finding_duplications(args.tree, args.duplicationseq, "2")   
+    pre = finding_duplications(args.tree, args.duplicationseq, "pre")    
+
+    cumulative_1 = dictionary_of_mutations(post_1, mut_matrix)
+    cumulative_2 = dictionary_of_mutations(post_2, mut_matrix)
+    cumulative_pre = dictionary_of_mutations(pre, mut_matrix)
+
+
+    plt.step(cumulative_1.keys(), cumulative_1.values(), label= f'1st copy postduplication', where='post')
+    plt.step(cumulative_2.keys(), cumulative_2.values(), label=f'2nd copy postduplication', where='post' )
+    plt.step(cumulative_pre.keys(), cumulative_pre.values(), label= f'preduplication', where='post' )
+    plt.legend(loc='lower right')
+    plt.xlabel("gene location")
+    plt.ylabel("cumulative sum of mutations")
+    plt.savefig(args.output)
 
 
