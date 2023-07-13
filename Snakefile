@@ -1,4 +1,4 @@
-LOCATIONS = ["point_mut", "one_before", "one_after", "before_after"]
+LOCATIONS = ["point_mut", "one_before"]
 
 rule all:
     input:
@@ -10,6 +10,8 @@ rule scaled_matrix:
     input:
         ref = "data/areference.gbk",
         tree = "data/rsv_a_genome.json",
+    params:
+        type_ = lambda wildcards: f'{wildcards.location}'
     output:
         scaled_matrix = "results/{location}_matrix.csv"
     shell:
@@ -17,7 +19,8 @@ rule scaled_matrix:
         python3 scripts/constructing-matrices.py \
         --ref {input.ref} \
         --tree {input.tree} \
-        --output {output.scaled_matrix}
+        --output {output.scaled_matrix} \
+        --type {params.type_}
         """
 
 rule graph_construction:
@@ -30,6 +33,8 @@ rule graph_construction:
         tree = "data/a_tree.nwk"
     output:
         "results/{location}_graph.png"
+    params:
+        type_ = lambda wildcards: f'{wildcards.location}'
     shell:
         """
         python3 scripts/graph.py \
@@ -37,5 +42,6 @@ rule graph_construction:
         --output {output} \
         --tree {input.tree} \
         --ref {input.ref} \
-        --duplicationseq {input.duplicationseq}
+        --duplicationseq {input.duplicationseq} \
+        --type {params.type_}
         """
