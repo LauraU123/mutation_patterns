@@ -9,7 +9,7 @@ from collections import Counter, defaultdict
 translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
 
 def CDS_finder(reference):
-    """this function finds CDS location and not CDS location, and saves only those not located at the end of the function"""
+    """this function finds CDS location """
     cds_ = dict()
     for feature in reference.features:
         if feature.type == 'CDS':  cds_[feature.qualifiers['gene'][0]] = (list(feature.location))
@@ -215,7 +215,6 @@ if __name__=="__main__":
     scaled_by_ratio_ = scaled_by_ratio(mutation_matrix, syn_ratio)
 
     syn_mut_count_reference = count_of_nucleotides_in_syn_positions(args.ref, args.type)
-    print(syn_mut_count_reference)
 
     scaled_normalized = scaled_by_nucleotides_and_normalized(scaled_by_ratio_, syn_mut_count_reference, args.type)
 

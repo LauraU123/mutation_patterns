@@ -40,6 +40,7 @@ if __name__=="__main__":
         for i in lst_double:
             for j in lst: 
                 if i[-1] != j: dct[f'{i}->{j}'] = mut_matrix.at[i, j]
+        plt.figure(figsize=(20,5))
         plt.plot(dct.keys(), dct.values(), 'o')
         plt.xticks(rotation=90)
         plt.savefig(args.output)
