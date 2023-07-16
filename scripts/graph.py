@@ -40,10 +40,10 @@ def finding_duplications(nwktree, reconstructeddupl, which):
                 break  
     for branch in tree_file.get_nonterminals(order='preorder'):
         if pd.isna(branch.name) == False:
-                predupl_sequence = seq_dict[branch.name][72:][1:-2]
+                predupl_sequence = seq_dict[branch.name][72:]
                 break  
-    post_dupl_1 = first_dupl_sequence[:72][1:-2]
-    post_dupl_2 = first_dupl_sequence[72:][1:-2]
+    post_dupl_1 = first_dupl_sequence[:72]
+    post_dupl_2 = first_dupl_sequence[72:]
 
     if which == "1":return(post_dupl_1)
     if which == "2": return(post_dupl_2)
@@ -94,6 +94,7 @@ def dictionary_of_mutations(duplication, mutation_matrix, type_):
                                         if ele[0] != codon[0]:
                                             sum_ = float(mutation_matrix.at[codon_plus_prev[:2], ele[0]])
                                             each_position[i] = sum_
+                                            
                 elif type_ == "one_after" and len(codon_plus_after)==4:
                     for key, entry in translations.items():
                         if codon in entry:
