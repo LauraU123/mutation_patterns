@@ -5,7 +5,7 @@ It includes context-based mutation spectrums.
 
 
 
-The outputs include scaled and normalized mutation matrices and cumulative distributions of expected synonymous mutations in the RSV-A G gene duplcation.
+The outputs include scaled and normalized mutation matrices and spectra, as well as cumulative distributions of expected synonymous mutations in the RSV-A G gene duplcation.
 
 One matrix and graph is constructed for each of the following:
 
