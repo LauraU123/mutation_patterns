@@ -2,7 +2,8 @@ LOCATIONS = ["point_mut", "one_before", "one_after", "before_after"]
 
 rule all:
     input:
-        graphs = expand("results/{location}_graph.png", location=LOCATIONS)
+        graphs = expand("results/{location}_graph.png", location=LOCATIONS),
+        spectra = expand("results/{location}_spectra.png", location=LOCATIONS)
 
 rule scaled_matrix:
     message:
@@ -22,6 +23,24 @@ rule scaled_matrix:
         --output {output.scaled_matrix} \
         --type {params.type_}
         """
+
+
+rule spectra:
+    message:
+        """Constructing mutation spectra"""
+    input:
+        matrix = rules.scaled_matrix.output,
+    output:
+        "results/{location}_spectra.png"
+    params:
+        type_ = lambda wildcards: f'{wildcards.location}'
+    shell:
+        """
+        python3 scripts/mutation_spectra.py \
+        --matrix {params.type_} \
+        --output {output} 
+        """
+
 
 rule graph_construction:
     message:
