@@ -1,4 +1,5 @@
 LOCATIONS = ["point_mut", "one_before", "one_after", "before_after"]
+configfile: "config/configfile.yaml"
 
 rule all:
     input:
@@ -82,7 +83,8 @@ rule graph_construction:
     output:
         "results/{location}_{a_or_b}_graph.png"
     params:
-        type_ = lambda wildcards: f'{wildcards.location}'
+        type_ = lambda w: f'{w.location}',
+        a_or_b = lambda w: config["reconstruct"].get(w.a_or_b)
     shell:
         """
         python3 scripts/graph.py \
@@ -90,6 +92,7 @@ rule graph_construction:
         --output {output} \
         --tree {input.tree} \
         --ref {input.ref} \
+        --subtype {params.a_or_b} \
         --duplicationseq {input.duplicationseq} \
         --type {params.type_}
         """

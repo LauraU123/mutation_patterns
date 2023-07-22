@@ -22,7 +22,7 @@ def cumulative(dictionary):
     return(cumul)
 
 
-def finding_duplications(nwktree, reconstructeddupl, which):
+def finding_duplications(nwktree, reconstructeddupl, subtype, which):
 
     """returns earliest sequence of duplication 1 duplication 2 or preduplication based on phylogenetic nwk tree and reconstructed dupl sequences"""
 
@@ -40,10 +40,10 @@ def finding_duplications(nwktree, reconstructeddupl, which):
                 break  
     for branch in tree_file.get_nonterminals(order='preorder'):
         if pd.isna(branch.name) == False:
-                predupl_sequence = seq_dict[branch.name][72:]
+                predupl_sequence = seq_dict[branch.name][int(subtype):]
                 break  
-    post_dupl_1 = first_dupl_sequence[:72]
-    post_dupl_2 = first_dupl_sequence[72:]
+    post_dupl_1 = first_dupl_sequence[:int(subtype)]
+    post_dupl_2 = first_dupl_sequence[int(subtype):]
 
     if which == "1":return(post_dupl_1)
     if which == "2": return(post_dupl_2)
@@ -141,6 +141,7 @@ if __name__=="__main__":
     parser.add_argument('--ref', type=str, help="genbank reference file")
     parser.add_argument('--output', type=str, help="graph png file")
     parser.add_argument('--type', required=True, help="context of the mutation")
+    parser.add_argument("--subtype", required=True, help="A or B - string")
     parser.add_argument('--duplicationseq', required=True, help="fasta file with reconstructed sequences")
 
     args = parser.parse_args()
@@ -148,9 +149,9 @@ if __name__=="__main__":
     mut_matrix = pd.read_csv(args.matrix)
     mut_matrix = mut_matrix.set_index('Unnamed: 0')
 
-    post_1 = finding_duplications(args.tree, args.duplicationseq, "1")    
-    post_2 = finding_duplications(args.tree, args.duplicationseq, "2")   
-    pre = finding_duplications(args.tree, args.duplicationseq, "pre")    
+    post_1 = finding_duplications(args.tree, args.duplicationseq, args.subtype,  "1")    
+    post_2 = finding_duplications(args.tree, args.duplicationseq, args.subtype, "2")   
+    pre = finding_duplications(args.tree, args.duplicationseq, args.subtype, "pre")    
 
     cumulative_1 = dictionary_of_mutations(post_1, mut_matrix, args.type)
     cumulative_2 = dictionary_of_mutations(post_2, mut_matrix, args.type)
