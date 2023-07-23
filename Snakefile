@@ -3,8 +3,8 @@ configfile: "config/configfile.yaml"
 
 rule all:
     input:
-        graphs = expand("results/{location}_{a_or_b}_graph.png", location=LOCATIONS, a_or_b= [ "b", "a"]),
-        spectra = expand("results/{location}_{a_or_b}_spectra.png", location=LOCATIONS, a_or_b= [ "b", "a"])
+        graphs = expand("results/{location}_{a_or_b}_graph.png", location=LOCATIONS, a_or_b= ["a", "b"]),
+        spectra = expand("results/{location}_{a_or_b}_spectra.png", location=LOCATIONS, a_or_b= [ "b"])
 
 
 
@@ -79,7 +79,7 @@ rule graph_construction:
         matrix = rules.scaled_matrix.output,
         ref = rules.scaled_matrix.input.ref,
         duplicationseq = "data/last_reconstruction_{a_or_b}.fasta",
-        tree = "data/{a_or_b}_tree.nwk"
+        tree = "data/{a_or_b}_tree_duplication.nwk"
     output:
         "results/{location}_{a_or_b}_graph.png"
     params:

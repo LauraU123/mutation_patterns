@@ -125,12 +125,14 @@ def mutations_matrix_unscaled(synonymous, reconstructed, which, type_):
     
     if type_ == "point_mut":
         for mutation, nr in all_muts_counter.items(): df.at[mutation[0], mutation[-1]] = int(nr)
+        print(df)
         return(df)
         
     else:
         for mutation, count in with_counters.items():
             if 'N' not in mutation:
                 for type, c in count.items():df.at[mutation, type] = c
+        print(df)
         return(df)
 
 
