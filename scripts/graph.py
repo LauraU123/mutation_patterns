@@ -35,7 +35,8 @@ def finding_duplications(nwktree, reconstructeddupl, subtype, which):
 
     for branch in tree_file.get_nonterminals(order='preorder'):
         if pd.isna(branch.name) == False:
-            if '-'*int(72) not in seq_dict[branch.name]:
+            print(branch.name)
+            if '-'*int(subtype) not in seq_dict[branch.name]:
                 first_dupl_sequence = seq_dict[branch.name]
                 break  
     for branch in tree_file.get_nonterminals(order='preorder'):
@@ -44,7 +45,9 @@ def finding_duplications(nwktree, reconstructeddupl, subtype, which):
                 break  
     post_dupl_1 = first_dupl_sequence[:int(subtype)]
     post_dupl_2 = first_dupl_sequence[int(subtype):]
-
+    print(post_dupl_1)
+    print(post_dupl_2)
+    print(predupl_sequence)
     if which == "1":return(post_dupl_1)
     if which == "2": return(post_dupl_2)
     if which == "pre": return(predupl_sequence)

@@ -1,6 +1,6 @@
 import argparse
 import json
-from Bio import SeqIO
+from Bio import SeqIO, Seq
 import pandas as pd
 from collections import Counter, defaultdict
 
@@ -69,7 +69,6 @@ def Synonymous_Mutations(f, node, dictionary_=None, new_=None):
             for gene, loc in gene_cds.items():
                 if gene in node['branch_attrs']['mutations']:
                     for mut in node['branch_attrs']['mutations'][gene]:
-                        #each possible codon location
                         aa_mutations.append(int(mut[1:-1])*3+ loc[0]-1) 
                         aa_mutations.append(int(mut[1:-1])*3+ loc[0]-2) 
                         aa_mutations.append(int(mut[1:-1])*3+ loc[0]-3) 
@@ -102,15 +101,13 @@ def mutations_matrix_unscaled(synonymous, reconstructed, which, type_):
                 if type_ == "one_before":
                     if entry.seq[location_of_interest-2] != '-':
                         all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}'].append(i[-1])
-                elif type_ == "one_after":
-                    if entry.seq[location_of_interest+1] != '-': all_dinucleotides[f'{i[0]}{entry.seq[location_of_interest+1]}'].append(i[-1])
-                elif type_ == "before_after":
-                    print(i, entry.id)
-                    print(entry.seq[location_of_interest-1])
-                    #print(entry.seq[location_of_interest+1])
 
-                    
-                    if entry.seq[location_of_interest+1] != '-' and entry.seq[location_of_interest-2] != '-': all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}{entry.seq[location_of_interest+1]}'].append(i[-1])
+                elif type_ == "one_after":
+                    #print(i)
+                    #print(f'{i[0]}{entry.seq[location_of_interest]}')
+                    if entry.seq[location_of_interest+1] != '-': all_dinucleotides[f'{i[0]}{entry.seq[location_of_interest]}'].append(i[-1])
+                elif type_ == "before_after":
+                    if entry.seq[location_of_interest] != '-' and entry.seq[location_of_interest-2] != '-': all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}{entry.seq[location_of_interest]}'].append(i[-1])
 
         with_counters = dict()
         for type, mut in all_dinucleotides.items():
@@ -145,8 +142,8 @@ def possible_syn_mut_locations(reference):
     sequence_ref_cds = dict()
     whole_seq_CDS = ""
     for gene, cds in gene_cds.items(): 
-        sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]]
-        whole_seq_CDS = whole_seq_CDS+ref_file.seq[cds[0]:cds[-1]]
+        sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]+1]
+        whole_seq_CDS = whole_seq_CDS+ref_file.seq[cds[0]:cds[-1]+1]
 
     synonymous_possibilities, nonsynonymous_possibilities = (0 for i in range(2))
     for gene, sequence in sequence_ref_cds.items():
@@ -177,7 +174,9 @@ def count_of_nucleotides_in_syn_positions(reference, type_):
     ref_file = SeqIO.read(reference, "genbank")
     gene_cds = CDS_finder_gbk(ref_file)
     sequence_ref_cds = dict()
-    for gene, cds in gene_cds.items(): sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]]
+    for gene, cds in gene_cds.items():
+        print(ref_file.seq[cds[0]:cds[-1]+1].translate()) 
+        sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]+1]
     list_all= []
     for gene, sequence in sequence_ref_cds.items():
         for i, letter in enumerate(sequence):

@@ -3,8 +3,8 @@ configfile: "config/configfile.yaml"
 
 rule all:
     input:
-        graphs = expand("results/{location}_{a_or_b}_graph.png", location=LOCATIONS, a_or_b= [ "b", "a"]),
-        spectra = expand("results/{location}_{a_or_b}_spectra.png", location=LOCATIONS, a_or_b= [ "b", "a"])
+        graphs = expand("results/{location}_{a_or_b}_graph.png", location=LOCATIONS, a_or_b= [ "a"]),
+        spectra = expand("results/{location}_{a_or_b}_spectra.png", location=LOCATIONS, a_or_b= [ "a"])
 
 
 
