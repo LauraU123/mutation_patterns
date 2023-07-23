@@ -10,7 +10,7 @@ translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'T
 
 
 def CDS_finder_gbk(reference):
-    #this function finds CDS location 
+    #this function finds CDS location from reference
     cds_ = dict()
     for feature in reference.features:
         if feature.type == 'CDS':  cds_[feature.qualifiers['gene'][0]] = (list(feature.location))
@@ -43,6 +43,7 @@ def Synonymous_Mutations(reffile, node, dictionary_=None, new_=None):
 """
 
 def CDS_finder(jsonfile):
+    # finds CDS from annotated json file
     CDS_locations = dict()
     for gene, data in jsonfile['meta']['genome_annotations'].items(): CDS_locations[gene] = [i for i in range(data['start'], data['end']+1)]
     CDS_locations.pop('nuc')
@@ -50,6 +51,7 @@ def CDS_finder(jsonfile):
 
 
 def all_loc_CDS(jsonfile):
+    #all CDS locations from jsonfile
     gene_cds = CDS_finder(jsonfile)
     all_loc_CDS_ = []
     for gene, locations in gene_cds.items(): all_loc_CDS_.extend(locations)
@@ -101,11 +103,8 @@ def mutations_matrix_unscaled(synonymous, reconstructed, which, type_):
                 if type_ == "one_before":
                     if entry.seq[location_of_interest-2] != '-':
                         all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}'].append(i[-1])
-
                 elif type_ == "one_after":
-                    #print(i)
-                    #print(f'{i[0]}{entry.seq[location_of_interest]}')
-                    if entry.seq[location_of_interest+1] != '-': all_dinucleotides[f'{i[0]}{entry.seq[location_of_interest]}'].append(i[-1])
+                    if entry.seq[location_of_interest] != '-': all_dinucleotides[f'{i[0]}{entry.seq[location_of_interest]}'].append(i[-1])
                 elif type_ == "before_after":
                     if entry.seq[location_of_interest] != '-' and entry.seq[location_of_interest-2] != '-': all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}{entry.seq[location_of_interest]}'].append(i[-1])
 
@@ -140,10 +139,10 @@ def possible_syn_mut_locations(reference):
     ref_file = SeqIO.read(reference, "genbank")
     gene_cds = CDS_finder_gbk(ref_file)
     sequence_ref_cds = dict()
-    whole_seq_CDS = ""
+    #whole_seq_CDS = ""
     for gene, cds in gene_cds.items(): 
         sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]+1]
-        whole_seq_CDS = whole_seq_CDS+ref_file.seq[cds[0]:cds[-1]+1]
+        #whole_seq_CDS = whole_seq_CDS+ref_file.seq[cds[0]:cds[-1]+1]
 
     synonymous_possibilities, nonsynonymous_possibilities = (0 for i in range(2))
     for gene, sequence in sequence_ref_cds.items():
@@ -171,11 +170,11 @@ def scaled_by_ratio(dataframe, ratio):
     return(scaled)
 
 def count_of_nucleotides_in_syn_positions(reference, type_):
+    #count of nucleotides in synonymous positions in the reference file
     ref_file = SeqIO.read(reference, "genbank")
     gene_cds = CDS_finder_gbk(ref_file)
     sequence_ref_cds = dict()
     for gene, cds in gene_cds.items():
-        print(ref_file.seq[cds[0]:cds[-1]+1].translate()) 
         sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]+1]
     list_all= []
     for gene, sequence in sequence_ref_cds.items():
@@ -185,19 +184,22 @@ def count_of_nucleotides_in_syn_positions(reference, type_):
                 for key, entry in translations.items():
                     if codon in entry:
                         if type_ == "point_mut":
-                            if 1< len(entry) <= 4: list_all.append(codon[-1])
+                            if 1< len(entry) <= 4: 
+                                list_all.append(codon[-1])
                             elif len(entry) > 4:
-                                list_all.append(codon[0])
+                                list_all.append(codon[-1])
                                 list_all.append(codon[0])
                             elif len(entry) == 1: continue
                         elif type_ == "one_before":
-                            if 1< len(entry) <= 4: list_all.append(str(codon[1:]))
+                            if 1< len(entry) <= 4: 
+                                list_all.append(str(codon[1:]))
                             elif len(entry) > 4:
                                 list_all.append(str(sequence[i-1:i+1]))
                                 list_all.append(str(codon[1:]))
                             elif len(entry) == 1: continue
                         elif type_ == "one_after":
-                            if 1< len(entry) <= 4: list_all.append(str(sequence[i+2:i+4]))
+                            if 1< len(entry) <= 4: 
+                                list_all.append(str(sequence[i+2:i+4]))
                             elif len(entry) > 4:
                                 list_all.append(str(codon[:-1]))
                                 list_all.append(str(sequence[i+2:i+4]))
