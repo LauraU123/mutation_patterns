@@ -35,7 +35,6 @@ def finding_duplications(nwktree, reconstructeddupl, subtype, which):
 
     for branch in tree_file.get_nonterminals(order='preorder'):
         if pd.isna(branch.name) == False:
-            print(branch.name)
             if '-'*int(subtype) not in seq_dict[branch.name]:
                 first_dupl_sequence = seq_dict[branch.name]
                 break  
@@ -45,9 +44,7 @@ def finding_duplications(nwktree, reconstructeddupl, subtype, which):
                 break  
     post_dupl_1 = first_dupl_sequence[:int(subtype)]
     post_dupl_2 = first_dupl_sequence[int(subtype):]
-    print(post_dupl_1)
-    print(post_dupl_2)
-    print(predupl_sequence)
+
     if which == "1":return(post_dupl_1)
     if which == "2": return(post_dupl_2)
     if which == "pre": return(predupl_sequence)
@@ -56,7 +53,6 @@ def finding_duplications(nwktree, reconstructeddupl, subtype, which):
 
 def dictionary_of_mutations(duplication, mutation_matrix, type_):
     sum_of_rows = mutation_matrix.sum(axis = 1)
-    print(sum_of_rows)
     translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
     each_position = dict()
     if type_ == "point_mut":
@@ -141,12 +137,6 @@ def dictionary_of__nonsynonymous_mutations(duplication, mutation_matrix, type_):
     print(sum_of_rows)
     translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
     each_position = dict()
-    for i, char in enumerate(duplication):
-                if i%3 == 0 and i !=0 :
-                    codon = duplication[i:i+3]
-                    codon_with_prev = str(duplication[i-1:i+3])
-                    codon_with_after = str(duplication[i:i+4])
-                    codon_before_after = str(duplication[i-1:i+4])
     if type_ == "point_mut":
         for i, char in enumerate(duplication):
             if i%3 == 0:
@@ -155,13 +145,9 @@ def dictionary_of__nonsynonymous_mutations(duplication, mutation_matrix, type_):
                 new_codons_1, new_codons_2, new_codons_3 = ([] for lst in range(3))
                 for pos, char in enumerate(codon):
                     for mut in ["A", "C", "G", "T"]:
-                        if pos == 0 and codon[0] != mut:
-                            new_codons_1.append(f"{mut}{codon[1]}{codon[2]}")
-                        if pos == 1 and codon[1] != mut:
-                            new_codons_2.append(f"{codon[0]}{mut}{codon[2]}")
-                        if pos == 2 and codon[2] != mut:
-                            new_codons_3.append(f"{codon[0]}{codon[1]}{mut}")
-                #print(new_codons_1)
+                        if pos == 0 and codon[0] != mut:new_codons_1.append(f"{mut}{codon[1]}{codon[2]}")
+                        if pos == 1 and codon[1] != mut: new_codons_2.append(f"{codon[0]}{mut}{codon[2]}")
+                        if pos == 2 and codon[2] != mut: new_codons_3.append(f"{codon[0]}{codon[1]}{mut}")
                 for key, entry in translations.items():
                     if codon in entry:
                         
@@ -176,10 +162,44 @@ def dictionary_of__nonsynonymous_mutations(duplication, mutation_matrix, type_):
                         each_position[i] = sum_of_muts_1
                         each_position[i+1] = sum_of_muts_2
                         each_position[i+2] = sum_of_muts_3
-    
+
+
+def nonsynonymous(duplication, mutation_matrix, type_):
+    sum_of_rows = mutation_matrix.sum(axis = 1)
+    translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
+    each_position = dict()
+    for i, char in enumerate(duplication):
+        if i%3 == 0:
+            codon = duplication[i:i+3]
+            codon_with_prev = duplication[i-1:i+3]
+            codon_with_after = duplication[i:i+4]
+            codon_before_after = duplication[i-1:i+4]
+
+            sum_of_muts_1, sum_of_muts_2, sum_of_muts_3 = (0 for j in range(3))
+            new_codons_1, new_codons_2, new_codons_3 = ([] for lst in range(3))
+            for pos, char in enumerate(codon):
+                for mut in ["A", "C", "G", "T"]:
+                    if pos == 0 and codon[0] != mut: new_codons_1.append(f"{mut}{codon[1]}{codon[2]}")
+                    if pos == 1 and codon[1] != mut: new_codons_2.append(f"{codon[0]}{mut}{codon[2]}")
+                    if pos == 2 and codon[2] != mut: new_codons_3.append(f"{codon[0]}{codon[1]}{mut}")
+                for key, entry in translations.items():
+                    if codon in entry:
+                        codons_diff_1 = set(new_codons_1).difference(set(entry))
+                        codons_diff_2 = set(new_codons_2).difference(set(entry))
+                        codons_diff_3 = set(new_codons_3).difference(set(entry))
+                if type_ == "point_mut":
+                    for ele in codons_diff_1:  sum_of_muts_1 += mutation_matrix.at[codon[0], ele[0]]
+                    for ele in codons_diff_2: sum_of_muts_2 += mutation_matrix.at[codon[1], ele[1]]
+                    for ele in codons_diff_3: sum_of_muts_3 += mutation_matrix.at[codon[2], ele[2]]
+                    each_position[i] = sum_of_muts_1
+                    each_position[i+1] = sum_of_muts_2
+                    each_position[i+2] = sum_of_muts_3
+    """
     elif type_ == "one_before":        
         for i, char in enumerate(duplication):
             if i%3 == 0:
+                codon = duplication[i:i+3]
+                codon_with_prev = duplication[i-1:i+3]
                 sum_of_muts_1, sum_of_muts_2, sum_of_muts_3 = (0 for j in range(3))
                 new_codons_1, new_codons_2, new_codons_3 = ([] for lst in range(3))
                 for pos, char in enumerate(codon):
@@ -211,6 +231,8 @@ def dictionary_of__nonsynonymous_mutations(duplication, mutation_matrix, type_):
     elif type_ == "one_before":        
         for i, char in enumerate(duplication):
             if i%3 == 0:
+                codon = duplication[i:i+3]
+                codon_with_after = duplication[i:i+4]
                 sum_of_muts_1, sum_of_muts_2, sum_of_muts_3 = (0 for j in range(3))
                 new_codons_1, new_codons_2, new_codons_3 = ([] for lst in range(3))
                 for pos, char in enumerate(codon):
@@ -235,9 +257,11 @@ def dictionary_of__nonsynonymous_mutations(duplication, mutation_matrix, type_):
                         each_position[i+1] = sum_of_muts_2
                         each_position[i+2] = sum_of_muts_3
 
-    elif type_ == "before_after":        
+    elif type_ == "before_after" :        
         for i, char in enumerate(duplication):
             if i%3 == 0:
+                codon = duplication[i:i+3]
+                codon_before_after = duplication[i-1:i+4]
                 sum_of_muts_1, sum_of_muts_2, sum_of_muts_3 = (0 for j in range(3))
                 new_codons_1, new_codons_2, new_codons_3 = ([] for lst in range(3))
                 for pos, char in enumerate(codon):
@@ -260,11 +284,73 @@ def dictionary_of__nonsynonymous_mutations(duplication, mutation_matrix, type_):
                         for ele in codons_diff_3: sum_of_muts_3 += mutation_matrix.at[f"{codon[1]}{codon[2]}{codon_before_after[-1]}", ele[2]]
                         each_position[i] = sum_of_muts_1
                         each_position[i+1] = sum_of_muts_2
-                        each_position[i+2] = sum_of_muts_3
+                        each_position[i+2] = sum_of_muts_3"""
 
 
-        cumulative_= cumulative(each_position)
-        return(cumulative_)
+    cumulative_= cumulative(each_position)
+    return(cumulative_)
+    
+def nonsynonymous(duplication, mutation_matrix, type_):
+    sum_of_rows = mutation_matrix.sum(axis = 1)
+    translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
+    each_position = dict()
+    for i, char in enumerate(duplication):
+        if i%3 == 0:
+            codon = duplication[i:i+3]
+            codon_with_prev = duplication[i-1:i+3]
+            codon_with_after = duplication[i:i+4]
+            codon_before_after = duplication[i-1:i+4]
+
+            sum_of_muts_1, sum_of_muts_2, sum_of_muts_3 = (0 for j in range(3))
+            new_codons_1, new_codons_2, new_codons_3 = ([] for lst in range(3))
+            for pos, char in enumerate(codon):
+                for mut in ["A", "C", "G", "T"]:
+                    if pos == 0 and codon[0] != mut: new_codons_1.append(f"{mut}{codon[1]}{codon[2]}")
+                    if pos == 1 and codon[1] != mut: new_codons_2.append(f"{codon[0]}{mut}{codon[2]}")
+                    if pos == 2 and codon[2] != mut: new_codons_3.append(f"{codon[0]}{codon[1]}{mut}")
+                for key, entry in translations.items():
+                    if codon in entry:
+                        codons_diff_1 = set(new_codons_1).difference(set(entry))
+                        codons_diff_2 = set(new_codons_2).difference(set(entry))
+                        codons_diff_3 = set(new_codons_3).difference(set(entry))
+                if type_ == "point_mut":
+                    for ele in codons_diff_1:  sum_of_muts_1 += mutation_matrix.at[codon[0], ele[0]]
+                    for ele in codons_diff_2: sum_of_muts_2 += mutation_matrix.at[codon[1], ele[1]]
+                    for ele in codons_diff_3: sum_of_muts_3 += mutation_matrix.at[codon[2], ele[2]]
+                    each_position[i] = sum_of_muts_1
+                    each_position[i+1] = sum_of_muts_2
+                    each_position[i+2] = sum_of_muts_3
+
+                elif type_ == "one_before" and len(codon_with_prev) == 4:        
+                    for ele in codons_diff_1: 
+                        print(mutation_matrix.at[f"{codon_with_prev[0]}{codon[0]}", ele[0]])
+                        sum_of_muts_1 += mutation_matrix.at[f"{codon_with_prev[0]}{codon[0]}", ele[0]]
+                    for ele in codons_diff_2:
+                        print(mutation_matrix.at[f"{codon[0]}{codon[1]}", ele[1]])
+                        sum_of_muts_2 += mutation_matrix.at[f"{codon[0]}{codon[1]}", ele[1]]
+                    for ele in codons_diff_3: 
+                        print(mutation_matrix.at[f"{codon[1]}{codon[2]}", ele[2]])
+                        sum_of_muts_3 += mutation_matrix.at[f"{codon[1]}{codon[2]}", ele[2]]
+                    each_position[i] = sum_of_muts_1
+                    each_position[i+1] = sum_of_muts_2
+                    each_position[i+2] = sum_of_muts_3
+                elif type_ == "one_after" and len(codon_with_after)==4:        
+                    for ele in codons_diff_1: sum_of_muts_1 += mutation_matrix.at[f"{codon[0]}{codon[1]}", ele[0]]
+                    for ele in codons_diff_2: sum_of_muts_2 += mutation_matrix.at[f"{codon[1]}{codon[2]}", ele[1]]
+                    for ele in codons_diff_3: sum_of_muts_3 += mutation_matrix.at[f"{codon[2]}{codon_with_after[-1]}", ele[2]]
+                    each_position[i] = sum_of_muts_1
+                    each_position[i+1] = sum_of_muts_2
+                    each_position[i+2] = sum_of_muts_3
+                elif type_ == "before_after" and len(codon_before_after)==5:        
+                    for ele in codons_diff_1: sum_of_muts_1 += mutation_matrix.at[f"{codon_before_after[0]}{codon[0]}{codon[1]}", ele[0]]
+                    for ele in codons_diff_2: sum_of_muts_2 += mutation_matrix.at[f"{codon}", ele[1]]
+                    for ele in codons_diff_3: sum_of_muts_3 += mutation_matrix.at[f"{codon[1]}{codon[2]}{codon_before_after[-1]}", ele[2]]
+                    each_position[i] = sum_of_muts_1
+                    each_position[i+1] = sum_of_muts_2
+                    each_position[i+2] = sum_of_muts_3
+    cumulative_= cumulative(each_position)
+    return(cumulative_)
+
 
 
 if __name__=="__main__":
@@ -289,17 +375,18 @@ if __name__=="__main__":
     post_2 = finding_duplications(args.tree, args.duplicationseq, args.subtype, "2")   
     pre = finding_duplications(args.tree, args.duplicationseq, args.subtype, "pre")    
 
-    cumulative_1 = dictionary_of_mutations(post_1, mut_matrix, args.type)
-    cumulative_2 = dictionary_of_mutations(post_2, mut_matrix, args.type)
-    cumulative_pre = dictionary_of_mutations(pre, mut_matrix, args.type)
+    #cumulative_1 = dictionary_of_mutations(post_1, mut_matrix, args.type)
+    #cumulative_2 = dictionary_of_mutations(post_2, mut_matrix, args.type)
+    #cumulative_pre = dictionary_of_mutations(pre, mut_matrix, args.type)
 
 
-    cumulative_1_nonsyn = dictionary_of__nonsynonymous_mutations(post_1, mut_matrix, args.type)
-    cumulative_2_nonsyn = dictionary_of__nonsynonymous_mutations(post_2, mut_matrix, args.type)
-    cumulative_pre_nonsyn = dictionary_of__nonsynonymous_mutations(pre, mut_matrix, args.type)
-
-    print(cumulative_pre)
-    print(cumulative_2)
+    cumulative_1_nonsyn = nonsynonymous(post_1, mut_matrix, args.type)
+    cumulative_2_nonsyn = nonsynonymous(post_2, mut_matrix, args.type)
+    cumulative_pre_nonsyn = nonsynonymous(pre, mut_matrix, args.type)
+        
+    print(cumulative_1_nonsyn)
+    print(cumulative_2_nonsyn)
+    print(cumulative_pre_nonsyn)
 
     #plt.step(cumulative_1.keys(), cumulative_1.values(), label= f'1st copy postduplication', where='post')
     #plt.step(cumulative_2.keys(), cumulative_2.values(), label=f'2nd copy postduplication', where='post' )
@@ -317,4 +404,4 @@ if __name__=="__main__":
     plt.legend(loc='lower right')
     plt.xlabel("gene location")
     plt.ylabel("cumulative sum of mutations")
-    plt.savefig(f"nonsynonymous_{args.subtype}.png")
+    plt.savefig(f"nonsynonymous_{args.type}_1.png")
