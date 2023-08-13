@@ -32,8 +32,11 @@ if __name__=="__main__":
             for nucl in lst: 
                 if nuc != nucl: dct[f'{nuc}->{nucl}'] = mut_matrix.at[nuc, nucl]
         ordered = OrderedDict(dct)
-        plt.plot(dct.keys(), dct.values(), 'o')
+        plt.plot(dct.keys(), dct.values(), 'o', markersize=10)
         plt.xticks(rotation=90)
+        plt.xticks(fontsize= 20, weight = 'bold')
+        plt.yticks(fontsize=20)
+        plt.tight_layout()
         plt.savefig(args.output)
     
     elif args.matrix == "one_before":
@@ -42,9 +45,12 @@ if __name__=="__main__":
             for j in lst: 
                 if i[-1] != j: dct[f'{i}->{j}'] = mut_matrix.at[i, j]
         
-        plt.figure(figsize=(20,5))
-        plt.plot(dct.keys(), dct.values(), 'o')
+        plt.figure(figsize=(30,15))
+        plt.plot(dct.keys(), dct.values(), 'o', markersize=20)
         plt.xticks(rotation=90)
+        plt.xticks(fontsize=40, weight = 'bold')
+        plt.yticks(fontsize=40)
+        plt.tight_layout()
         plt.savefig(args.output)
 
     elif args.matrix == "one_after":
@@ -53,9 +59,12 @@ if __name__=="__main__":
             for j in lst: 
                 if i[0] != j: dct[f'{i}->{j}'] = mut_matrix.at[i, j]
         ordered = OrderedDict(dct)
-        plt.figure(figsize=(20,5))
-        plt.plot(ordered.keys(), ordered.values(), 'o')
+        plt.figure(figsize=(30,15))
+        plt.plot(ordered.keys(), ordered.values(), 'o', markersize=20)
         plt.xticks(rotation=90)
+        plt.xticks(fontsize= 40, weight = 'bold')
+        plt.yticks(fontsize=40)
+        plt.tight_layout()
         plt.savefig(args.output)
     
     elif args.matrix == "before_after":
@@ -63,6 +72,13 @@ if __name__=="__main__":
         for i in lst_triple:
             for j in lst: 
                 if i[1] != j: dct[f'{i}->{j}'] = mut_matrix.at[i, j]
+        plt.figure(figsize=(30,15))
+        plt.plot(dct.keys(), dct.values(), 'o', markersize=20)
+        plt.xticks(rotation=90)
+        plt.xticks(fontsize= 40, weight = 'bold')
+        plt.yticks(fontsize=40)
+        plt.tight_layout()
+        plt.savefig(args.output)
 
          #A, C, G, T       
         for base in lst:
@@ -70,7 +86,17 @@ if __name__=="__main__":
             for entry, code in dct.items():
                 #for each entry in the dict, if the middle value is the base in question
                     if entry[1] == base:dct_for_subtype[entry] = code
-            plt.figure(figsize=(20,7))
-            plt.plot(dct_for_subtype.keys(), dct_for_subtype.values(), 'o')
-            plt.xticks(rotation=90)
-            plt.savefig(args.rsvsubtype + "_before_after" + f"{base}.png")
+            for base_ in lst:
+                dct_for_base = dict()
+                for entry_, code_ in dct_for_subtype.items():
+                    if entry_[-1] == base_: 
+                        print(entry_, entry_[-1])
+                        dct_for_base[entry_] = code_
+
+                plt.figure(figsize=(20,14))
+                plt.plot(dct_for_base.keys(), dct_for_base.values(), 'o', markersize=20)
+                plt.xticks(rotation=90)
+                plt.xticks(fontsize= 40, weight = 'bold')
+                plt.yticks(fontsize=40)
+                plt.tight_layout()
+                plt.savefig(args.rsvsubtype + "_before_after" + f"{base}_to_{base_}.png")
