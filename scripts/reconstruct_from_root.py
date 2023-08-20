@@ -4,8 +4,7 @@ from Bio import SeqIO, Phylo, SeqRecord, Seq
 
 def new_recursive(node, list_=None, dictionary_=None):
 
-    """ this function does what the previous recursive function did, but all in one go.
-     Thus, it returns a dictionary with all the nodes and names with the relevant mutations attached"""
+    """ this returns a dictionary with all the nodes and names with the relevant mutations attached"""
 
     if list_ is None:
         list_ = []
