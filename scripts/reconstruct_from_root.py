@@ -22,8 +22,7 @@ def new_recursive(node, list_=None, dictionary_=None):
     if 'children' in node:
         for child in node['children']:
             
-           new_recursive(child, list(list_), dictionary_)
-           
+           new_recursive(child, list(list_), dictionary_)   
     return(dictionary_)
 
 
