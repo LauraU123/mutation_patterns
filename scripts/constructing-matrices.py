@@ -1,6 +1,6 @@
 import argparse
 import json
-from Bio import SeqIO
+from Bio import SeqIO, Seq
 import pandas as pd
 from collections import Counter, defaultdict
 
@@ -8,15 +8,16 @@ from collections import Counter, defaultdict
 #Translation Matrix 
 translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
 
-def CDS_finder(reference):
-    """this function finds CDS location """
+
+def CDS_finder_gbk(reference):
+    #this function finds CDS location from reference
     cds_ = dict()
     for feature in reference.features:
         if feature.type == 'CDS':  cds_[feature.qualifiers['gene'][0]] = (list(feature.location))
     return(cds_)
-
+"""
 def Synonymous_Mutations(reffile, node, dictionary_=None, new_=None):
-    """ Finds Synonymous mutations in CDS regions. Input:nested json"""
+    #Finds Synonymous mutations in CDS regions. Input:nested json
     ref_file = SeqIO.read(reffile, "genbank")
     gene_cds = CDS_finder(ref_file)
     if new_ is None: new_ = []
@@ -30,6 +31,8 @@ def Synonymous_Mutations(reffile, node, dictionary_=None, new_=None):
                         aa_mutations.append(int(mut[1:-1])*3+loc[0]) # converting the amino acid location to nucleotide
             for mut in node['branch_attrs']['mutations']['nuc']:
                 if '-' not in mut and '*' not in mut and 'N' not in mut and "R" not in mut and "Y" not in mut and "M" not in mut and "D" not in mut:
+                    print(mut, aa_mutations)
+                    #make sure the codon is correct. 
                     if int(mut[1:-1]) not in aa_mutations and int(mut[1:-1])+2 not in aa_mutations and int(mut[1:-1])+1 not in aa_mutations:  #if the mutation is not in the same codon as a aa mutation
                         new_.append(mut)
                     else: in_it.append(mut[1:-1])
@@ -37,10 +40,50 @@ def Synonymous_Mutations(reffile, node, dictionary_=None, new_=None):
     if 'children' in node:
         for child in node['children']: Synonymous_Mutations(reffile, child, dictionary_, new_=None)
     return(dictionary_)
+"""
+
+def CDS_finder(jsonfile):
+    # finds CDS from annotated json file
+    CDS_locations = dict()
+    for gene, data in jsonfile['meta']['genome_annotations'].items(): CDS_locations[gene] = [i for i in range(data['start'], data['end']+1)]
+    CDS_locations.pop('nuc')
+    return(CDS_locations)
 
 
+def all_loc_CDS(jsonfile):
+    #all CDS locations from jsonfile
+    gene_cds = CDS_finder(jsonfile)
+    all_loc_CDS_ = []
+    for gene, locations in gene_cds.items(): all_loc_CDS_.extend(locations)
+    return(all_loc_CDS_)
+    
+    
 
-def mutations_matrix_unscaled(synonymous, type_):
+def Synonymous_Mutations(f, node, dictionary_=None, new_=None):
+    """ Finds Synonymous mutations in CDS regions. Input:nested json"""
+    gene_cds = CDS_finder(f)
+    all_cds = all_loc_CDS(f)
+    if new_ is None: new_ = []
+    if dictionary_ is None: dictionary_ = dict()
+    if 'mutations' in node['branch_attrs']:
+        aa_mutations, new_ = ([] for i in range(2))
+        if 'nuc' in node['branch_attrs']['mutations']:
+            for gene, loc in gene_cds.items():
+                if gene in node['branch_attrs']['mutations']:
+                    for mut in node['branch_attrs']['mutations'][gene]:
+                        aa_mutations.append(int(mut[1:-1])*3+ loc[0]-1) 
+                        aa_mutations.append(int(mut[1:-1])*3+ loc[0]-2) 
+                        aa_mutations.append(int(mut[1:-1])*3+ loc[0]-3) 
+            for nucl in node['branch_attrs']['mutations']['nuc']:
+                if int(nucl[1:-1]) not in aa_mutations: 
+                    if '-' not in nucl and int(nucl[1:-1]) in all_cds: new_.append(nucl)
+    if 'name' in node: dictionary_[node['name']] = new_
+    if 'children' in node:
+        for child in node['children']: Synonymous_Mutations(f, child, dictionary_, new_=None)
+    return(dictionary_)
+
+
+def mutations_matrix_unscaled(synonymous, reconstructed, which, type_):
     """Constructing matrix from synonymous mutations"""
     mut_by_branch_CDS, all_dinucleotides = (defaultdict(list) for i in range(2))
     all_muts = []
@@ -53,7 +96,7 @@ def mutations_matrix_unscaled(synonymous, type_):
                     mut_by_branch_CDS[branch].append(mut)
 
     if type_ != "point_mut":
-        aligned_for_tree = SeqIO.parse("data/reconstructed_sequences.fasta", "fasta")
+        aligned_for_tree = SeqIO.parse(reconstructed, "fasta")
         for entry in aligned_for_tree:
             for i in mut_by_branch_CDS[entry.id]:
                 location_of_interest = int(i[1:-1])
@@ -61,9 +104,9 @@ def mutations_matrix_unscaled(synonymous, type_):
                     if entry.seq[location_of_interest-2] != '-':
                         all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}'].append(i[-1])
                 elif type_ == "one_after":
-                    if entry.seq[location_of_interest+1] != '-': all_dinucleotides[f'{i[0]}{entry.seq[location_of_interest+1]}'].append(i[-1])
+                    if entry.seq[location_of_interest] != '-': all_dinucleotides[f'{i[0]}{entry.seq[location_of_interest]}'].append(i[-1])
                 elif type_ == "before_after":
-                    if entry.seq[location_of_interest+1] != '-' and entry.seq[location_of_interest-2] != '-': all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}{entry.seq[location_of_interest+1]}'].append(i[-1])
+                    if entry.seq[location_of_interest] != '-' and entry.seq[location_of_interest-2] != '-': all_dinucleotides[f'{entry.seq[location_of_interest-2]}{i[0]}{entry.seq[location_of_interest]}'].append(i[-1])
 
         with_counters = dict()
         for type, mut in all_dinucleotides.items():
@@ -82,24 +125,26 @@ def mutations_matrix_unscaled(synonymous, type_):
     
     if type_ == "point_mut":
         for mutation, nr in all_muts_counter.items(): df.at[mutation[0], mutation[-1]] = int(nr)
+        print(df)
         return(df)
         
     else:
         for mutation, count in with_counters.items():
             if 'N' not in mutation:
                 for type, c in count.items():df.at[mutation, type] = c
+        print(df)
         return(df)
 
 
 def possible_syn_mut_locations(reference):
     """finding ratio of synonymous to nonsynonymous mutation locations in the genome"""
     ref_file = SeqIO.read(reference, "genbank")
-    gene_cds = CDS_finder(ref_file)
+    gene_cds = CDS_finder_gbk(ref_file)
     sequence_ref_cds = dict()
-    whole_seq_CDS = ""
+    #whole_seq_CDS = ""
     for gene, cds in gene_cds.items(): 
-        sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]]
-        whole_seq_CDS = whole_seq_CDS+ref_file.seq[cds[0]:cds[-1]]
+        sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]+1]
+        #whole_seq_CDS = whole_seq_CDS+ref_file.seq[cds[0]:cds[-1]+1]
 
     synonymous_possibilities, nonsynonymous_possibilities = (0 for i in range(2))
     for gene, sequence in sequence_ref_cds.items():
@@ -127,10 +172,12 @@ def scaled_by_ratio(dataframe, ratio):
     return(scaled)
 
 def count_of_nucleotides_in_syn_positions(reference, type_):
+    #count of nucleotides in synonymous positions in the reference file
     ref_file = SeqIO.read(reference, "genbank")
-    gene_cds = CDS_finder(ref_file)
+    gene_cds = CDS_finder_gbk(ref_file)
     sequence_ref_cds = dict()
-    for gene, cds in gene_cds.items(): sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]]
+    for gene, cds in gene_cds.items():
+        sequence_ref_cds[gene] = ref_file.seq[cds[0]:cds[-1]+1]
     list_all= []
     for gene, sequence in sequence_ref_cds.items():
         for i, letter in enumerate(sequence):
@@ -139,19 +186,22 @@ def count_of_nucleotides_in_syn_positions(reference, type_):
                 for key, entry in translations.items():
                     if codon in entry:
                         if type_ == "point_mut":
-                            if 1< len(entry) <= 4: list_all.append(codon[-1])
+                            if 1< len(entry) <= 4: 
+                                list_all.append(codon[-1])
                             elif len(entry) > 4:
-                                list_all.append(codon[0])
+                                list_all.append(codon[-1])
                                 list_all.append(codon[0])
                             elif len(entry) == 1: continue
                         elif type_ == "one_before":
-                            if 1< len(entry) <= 4: list_all.append(str(codon[1:]))
+                            if 1< len(entry) <= 4: 
+                                list_all.append(str(codon[1:]))
                             elif len(entry) > 4:
                                 list_all.append(str(sequence[i-1:i+1]))
                                 list_all.append(str(codon[1:]))
                             elif len(entry) == 1: continue
                         elif type_ == "one_after":
-                            if 1< len(entry) <= 4: list_all.append(str(sequence[i+2:i+4]))
+                            if 1< len(entry) <= 4: 
+                                list_all.append(str(sequence[i+2:i+4]))
                             elif len(entry) > 4:
                                 list_all.append(str(codon[:-1]))
                                 list_all.append(str(sequence[i+2:i+4]))
@@ -183,7 +233,6 @@ def scaled_by_nucleotides_and_normalized(dataframe, nucl_dict, type_):
 
     df_ratios = pd.DataFrame.from_dict(nucl_dict, orient='index').astype(int).T
     df_ratios = df_ratios.divide(total)
-    print(df_ratios)
     for n in nuc: dataframe.loc[[n]] = dataframe.loc[[n]].div(float(df_ratios[n]))
 
     #normalizing step
@@ -200,15 +249,19 @@ if __name__=="__main__":
     parser.add_argument('--ref', required=True, type=str, help="reference file, genbank format")
     parser.add_argument('--tree', required=True, type=str, help="Tree json annotated with amino acid and nucleotide mutations")
     parser.add_argument('--output', type=str, help="output CSV file")
+    parser.add_argument('--rsvsubtype', type=str, help="a or b")
+    parser.add_argument("--reconstructedseq", type=str, required=True)
     parser.add_argument('--type', type=str, help="type of context of mutation")
     args = parser.parse_args()
 
     with open (args.tree) as file_:
         f = json.load(file_)  
 
-    synonymous = Synonymous_Mutations(args.ref, f['tree'])
+    CDS_dict = CDS_finder(f)
 
-    mutation_matrix = mutations_matrix_unscaled(synonymous, args.type)
+    synonymous = Synonymous_Mutations(f, f['tree'])
+
+    mutation_matrix = mutations_matrix_unscaled(synonymous, args.reconstructedseq, args.rsvsubtype, args.type)
 
     syn_ratio = possible_syn_mut_locations(args.ref)    
 

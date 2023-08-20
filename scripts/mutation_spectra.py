@@ -11,6 +11,7 @@ if __name__=="__main__":
     
     parser.add_argument('--matrix', required=True, type=str, help="matrix type")
     parser.add_argument('--output', type=str, help="spectra png file")
+    parser.add_argument('--rsvsubtype', type=str, help="a or b")
     args = parser.parse_args()
 
 
@@ -22,7 +23,7 @@ if __name__=="__main__":
                                                            'ATA', 'ATC', 'ATG', 'ATT', 'CTA', 'GTA', 'TTA', 'CTC', 'CTG', 'CTT', 'GTC', 'GTG', 'GTT', 'TTC', 'TTG', 'TTT'] 
 
 
-    mut_matrix = pd.read_csv(f"results/{args.matrix}_matrix.csv")
+    mut_matrix = pd.read_csv(f"results/{args.matrix}_{args.rsvsubtype}_matrix.csv")
     mut_matrix = mut_matrix.set_index('Unnamed: 0')
 
 
