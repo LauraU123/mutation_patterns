@@ -31,7 +31,8 @@ One matrix and graph is constructed for each of the following:
 ### Running the workflow
 
 The workflow can be run from the command line using Snakemake:
-```Snakemake --cores all
+```
+Snakemake --cores all
 ```
 
 To change which matrices and graphs are constructed, edit the LOCATIONS list in the Snakefile.
