@@ -1,6 +1,5 @@
-import argparse
-import json
-from Bio import SeqIO, Seq
+import argparse, json
+from Bio import SeqIO
 import pandas as pd
 from collections import Counter, defaultdict
 
@@ -15,32 +14,6 @@ def CDS_finder_gbk(reference):
     for feature in reference.features:
         if feature.type == 'CDS':  cds_[feature.qualifiers['gene'][0]] = (list(feature.location))
     return(cds_)
-"""
-def Synonymous_Mutations(reffile, node, dictionary_=None, new_=None):
-    #Finds Synonymous mutations in CDS regions. Input:nested json
-    ref_file = SeqIO.read(reffile, "genbank")
-    gene_cds = CDS_finder(ref_file)
-    if new_ is None: new_ = []
-    if dictionary_ is None: dictionary_ = dict()
-    if 'mutations' in node['branch_attrs']:
-        aa_mutations, new_, in_it = ([] for i in range(3))
-        if 'nuc' in node['branch_attrs']['mutations']:
-            for gene, loc in gene_cds.items():
-                if gene in node['branch_attrs']['mutations']:
-                    for mut in node['branch_attrs']['mutations'][gene]:
-                        aa_mutations.append(int(mut[1:-1])*3+loc[0]) # converting the amino acid location to nucleotide
-            for mut in node['branch_attrs']['mutations']['nuc']:
-                if '-' not in mut and '*' not in mut and 'N' not in mut and "R" not in mut and "Y" not in mut and "M" not in mut and "D" not in mut:
-                    print(mut, aa_mutations)
-                    #make sure the codon is correct. 
-                    if int(mut[1:-1]) not in aa_mutations and int(mut[1:-1])+2 not in aa_mutations and int(mut[1:-1])+1 not in aa_mutations:  #if the mutation is not in the same codon as a aa mutation
-                        new_.append(mut)
-                    else: in_it.append(mut[1:-1])
-    if 'name' in node: dictionary_[node['name']] = new_
-    if 'children' in node:
-        for child in node['children']: Synonymous_Mutations(reffile, child, dictionary_, new_=None)
-    return(dictionary_)
-"""
 
 def CDS_finder(jsonfile):
     # finds CDS from annotated json file
@@ -57,8 +30,6 @@ def all_loc_CDS(jsonfile):
     for gene, locations in gene_cds.items(): all_loc_CDS_.extend(locations)
     return(all_loc_CDS_)
     
-    
-
 def Synonymous_Mutations(f, node, dictionary_=None, new_=None):
     """ Finds Synonymous mutations in CDS regions. Input:nested json"""
     gene_cds = CDS_finder(f)
@@ -126,8 +97,7 @@ def mutations_matrix_unscaled(synonymous, reconstructed, which, type_):
     if type_ == "point_mut":
         for mutation, nr in all_muts_counter.items(): df.at[mutation[0], mutation[-1]] = int(nr)
         print(df)
-        return(df)
-        
+        return(df)  
     else:
         for mutation, count in with_counters.items():
             if 'N' not in mutation:
@@ -161,8 +131,7 @@ def possible_syn_mut_locations(reference):
     return(syn_ratio)
 
 
-
-#now have to divide by the nr of locations where the mutation can occur
+#now  to divide by the nr of locations where the mutation can occur
 
 
 def scaled_by_ratio(dataframe, ratio):
@@ -240,7 +209,6 @@ def scaled_by_nucleotides_and_normalized(dataframe, nucl_dict, type_):
     scaled_and_normalized = dataframe.divide(sum_)
     return(scaled_and_normalized)
 
-
 if __name__=="__main__":
     parser = argparse.ArgumentParser(
         description="Construct synynymous mutation matrix",
@@ -272,5 +240,3 @@ if __name__=="__main__":
     scaled_normalized = scaled_by_nucleotides_and_normalized(scaled_by_ratio_, syn_mut_count_reference, args.type)
 
     scaled_normalized.to_csv(args.output)
-
-

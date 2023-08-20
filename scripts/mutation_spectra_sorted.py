@@ -13,7 +13,6 @@ if __name__=="__main__":
     parser.add_argument('--rsvsubtype', type=str, help="a or b")
     args = parser.parse_args()
 
-
     lst = ["A", "C", "G", "T"]
     lst_double = ['AA', 'CA', 'GA', 'TA', 'AC', 'CC', 'GC', 'TC', 'AG', 'CG', 'GG', 'TG' ,'AT', 'CT', 'GT', 'TT']
     lst_triple =['AAA', 'AAC', 'AAG', 'AAT', 'CAA', 'GAA', 'TAA', 'CAC', 'CAG', 'CAT', 'GAC', 'GAG', 'GAT', 'TAC', 'TAG', 'TAT' ,
@@ -24,7 +23,6 @@ if __name__=="__main__":
 
     mut_matrix = pd.read_csv(f"results/{args.matrix}_{args.rsvsubtype}_matrix.csv")
     mut_matrix = mut_matrix.set_index('Unnamed: 0')
-
 
     if args.matrix == "point_mut":
         dct = dict()

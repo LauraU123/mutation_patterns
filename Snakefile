@@ -1,12 +1,10 @@
-LOCATIONS = ["point_mut", "one_before", "one_after", "before_after"]
+LOCATIONS = ["before_after","point_mut", "one_before", "one_after"]
 configfile: "config/configfile.yaml"
 
 rule all:
     input:
-        graphs = expand("results/{location}_{a_or_b}_graph.png", location=LOCATIONS, a_or_b= ["a", "b"]),
-        spectra = expand("results/{location}_{a_or_b}_spectra.png", location=LOCATIONS, a_or_b= [ "b"])
-
-
+        graphs = expand("results/{location}_{a_or_b}_syn_graph.png", location=LOCATIONS, a_or_b= ["a"]),
+        spectra = expand("results/{location}_{a_or_b}_spectra.png", location=LOCATIONS, a_or_b= [ "a"])
 
 
 rule branch_from_root:
@@ -65,7 +63,7 @@ rule spectra:
         subtype = lambda wildcards: f'{wildcards.a_or_b}'
     shell:
         """
-        python3 scripts/mutation_spectra.py \
+        python3 scripts/mutation_spectra_sorted.py \
         --matrix {params.type_} \
         --output {output} \
         --rsvsubtype {params.subtype}
@@ -81,7 +79,8 @@ rule graph_construction:
         duplicationseq = "data/last_reconstruction_{a_or_b}.fasta",
         tree = "data/{a_or_b}_tree_duplication.nwk"
     output:
-        "results/{location}_{a_or_b}_graph.png"
+        syn = "results/{location}_{a_or_b}_syn_graph.png",
+        nonsyn = "results/{location}_{a_or_b}_nonsyn_graph.png"
     params:
         type_ = lambda w: f'{w.location}',
         a_or_b = lambda w: config["reconstruct"].get(w.a_or_b)
@@ -89,7 +88,8 @@ rule graph_construction:
         """
         python3 scripts/graph.py \
         --matrix {input.matrix} \
-        --output {output} \
+        --syn {output.syn} \
+        --nonsyn {output.nonsyn} \
         --tree {input.tree} \
         --ref {input.ref} \
         --subtype {params.a_or_b} \
