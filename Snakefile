@@ -39,6 +39,7 @@ rule scaled_matrix:
         subtype = lambda wildcards: f'{wildcards.a_or_b}'
     output:
         scaled_matrix = "results/{location}_{a_or_b}_matrix.csv",
+        margin = "results/{location}_{a_or_b}_margin.csv"
     shell:
         """
         python3 scripts/constructing-matrices.py \
@@ -46,6 +47,7 @@ rule scaled_matrix:
         --tree {input.tree} \
         --reconstructedseq {input.reconstructed} \
         --output {output.scaled_matrix} \
+        --margins {output.margin} \
         --type {params.type_} \
         --rsvsubtype {params.subtype}
         """
@@ -74,7 +76,7 @@ rule graph_construction:
     message:
         """Constructing graphs"""
     input:
-        matrix = rules.scaled_matrix.output,
+        matrix = rules.scaled_matrix.output.scaled_matrix,
         ref = rules.scaled_matrix.input.ref,
         duplicationseq = "data/last_reconstruction_{a_or_b}.fasta",
         tree = "data/{a_or_b}_tree_duplication.nwk"

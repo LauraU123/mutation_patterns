@@ -22,29 +22,41 @@ if __name__=="__main__":
 
 
     mut_matrix = pd.read_csv(f"results/{args.matrix}_{args.rsvsubtype}_matrix.csv")
+    error = pd.read_csv(f"results/{args.matrix}_{args.rsvsubtype}_margin.csv")
     mut_matrix = mut_matrix.set_index('Unnamed: 0')
+    error = error.set_index('Unnamed: 0')
 
     if args.matrix == "point_mut":
         dct = dict()
+        err = []
         for nuc in lst:
             for nucl in lst: 
-                if nuc != nucl: dct[f'{nuc}->{nucl}'] = mut_matrix.at[nuc, nucl]
+                if nuc != nucl: 
+                    dct[f'{nuc}->{nucl}'] = mut_matrix.at[nuc, nucl]
+                    err.append(error.at[nuc, nucl])
         ordered = OrderedDict(dct)
-        plt.plot(dct.keys(), dct.values(), 'o', markersize=10)
+        print("error", err)
+        plt.errorbar(ordered.keys(), ordered.values(), fmt='o', yerr= err, markersize=3)
         plt.xticks(rotation=90)
-        plt.xticks(fontsize= 20, weight = 'bold')
+        plt.xticks(fontsize= 20)
         plt.yticks(fontsize=20)
         plt.tight_layout()
         plt.savefig(args.output)
     
     elif args.matrix == "one_before":
         dct = dict()
+        err = []
         for i in lst_double:
             for j in lst: 
-                if i[-1] != j: dct[f'{i}->{j}'] = mut_matrix.at[i, j]
-        
+                if i[-1] != j: 
+                    dct[f'{i}->{j}'] = mut_matrix.at[i, j]
+                    err.append(error.at[i, j])
+        ordered = OrderedDict(dct)
         plt.figure(figsize=(30,15))
-        plt.plot(dct.keys(), dct.values(), 'o', markersize=20)
+        plt.errorbar(dct.keys(), dct.values(), fmt='o', yerr=err, markersize=10)
+        for i in range(0,48,8):
+                print(i)
+                plt.axvspan(i-0.5, i+3.5, facecolor='b', alpha=0.1)
         plt.xticks(rotation=90)
         plt.xticks(fontsize=40, weight = 'bold')
         plt.yticks(fontsize=40)
@@ -53,14 +65,20 @@ if __name__=="__main__":
 
     elif args.matrix == "one_after":
         dct = dict()
+        err = []
         for i in lst_double:
             for j in lst: 
-                if i[0] != j: dct[f'{i}->{j}'] = mut_matrix.at[i, j]
+                if i[0] != j: 
+                    dct[f'{i}->{j}'] = mut_matrix.at[i, j]
+                    err.append(error.at[i,j])
         ordered = OrderedDict(dct)
         plt.figure(figsize=(30,15))
-        plt.plot(ordered.keys(), ordered.values(), 'o', markersize=20)
+        plt.errorbar(ordered.keys(), ordered.values(), fmt='o', yerr=err, markersize=10)
+        for i in range(0,48,8):
+                print(i)
+                plt.axvspan(i-0.5, i+3.5, facecolor='b', alpha=0.1)
         plt.xticks(rotation=90)
-        plt.xticks(fontsize= 40, weight = 'bold')
+        plt.xticks(fontsize= 40)
         plt.yticks(fontsize=40)
         plt.tight_layout()
         plt.savefig(args.output)
@@ -88,7 +106,7 @@ if __name__=="__main__":
                 dct_for_base = dict()
                 for entry_, code_ in dct_for_subtype.items():
                     if entry_[-1] == base_: 
-                        print(entry_, entry_[-1])
+                        #print(entry_, entry_[-1])
                         dct_for_base[entry_] = code_
 
                 plt.figure(figsize=(20,14))

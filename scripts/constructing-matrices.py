@@ -1,6 +1,7 @@
 import argparse, json
 from Bio import SeqIO
 import pandas as pd
+import numpy as np
 from collections import Counter, defaultdict
 
 
@@ -217,6 +218,7 @@ if __name__=="__main__":
     parser.add_argument('--ref', required=True, type=str, help="reference file, genbank format")
     parser.add_argument('--tree', required=True, type=str, help="Tree json annotated with amino acid and nucleotide mutations")
     parser.add_argument('--output', type=str, help="output CSV file")
+    parser.add_argument('--margins', type=str, help="output CSV file margin of error")
     parser.add_argument('--rsvsubtype', type=str, help="a or b")
     parser.add_argument("--reconstructedseq", type=str, required=True)
     parser.add_argument('--type', type=str, help="type of context of mutation")
@@ -240,3 +242,7 @@ if __name__=="__main__":
     scaled_normalized = scaled_by_nucleotides_and_normalized(scaled_by_ratio_, syn_mut_count_reference, args.type)
 
     scaled_normalized.to_csv(args.output)
+
+    margin_of_error = np.sqrt(scaled_normalized)/mutation_matrix
+
+    margin_of_error.to_csv(args.margins)
