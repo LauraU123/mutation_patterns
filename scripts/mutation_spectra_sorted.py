@@ -51,9 +51,9 @@ if __name__=="__main__":
                 if i[-1] != j: 
                     dct[f'{i}->{j}'] = mut_matrix.at[i, j]
                     err.append(error.at[i, j])
-        ordered = OrderedDict(dct)
+        ordered = OrderedDict(sorted(dct.items(), key=lambda x: x[0][1:]))
         plt.figure(figsize=(30,15))
-        plt.errorbar(dct.keys(), dct.values(), fmt='o', yerr=err, markersize=10)
+        plt.errorbar(ordered.keys(), ordered.values(), fmt='o', yerr=err, markersize=10)
         for i in range(0,48,8):
                 print(i)
                 plt.axvspan(i-0.5, i+3.5, facecolor='b', alpha=0.1)
