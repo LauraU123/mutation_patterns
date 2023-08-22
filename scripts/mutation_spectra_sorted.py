@@ -34,9 +34,7 @@ if __name__=="__main__":
                 if nuc != nucl: 
                     dct[f'{nuc}->{nucl}'] = mut_matrix.at[nuc, nucl]
                     err.append(error.at[nuc, nucl])
-        ordered = OrderedDict(dct)
-        print("error", err)
-        plt.errorbar(ordered.keys(), ordered.values(), fmt='o', yerr= err, markersize=3)
+        plt.errorbar(dct.keys(), dct.values(), fmt='o', yerr= err, markersize=3)
         plt.xticks(rotation=90)
         plt.xticks(fontsize= 20)
         plt.yticks(fontsize=20)
@@ -50,15 +48,18 @@ if __name__=="__main__":
             for j in lst: 
                 if i[-1] != j: 
                     dct[f'{i}->{j}'] = mut_matrix.at[i, j]
-                    err.append(error.at[i, j])
         ordered = OrderedDict(sorted(dct.items(), key=lambda x: x[0][1:]))
+        # finding margin of error for each mutation
+        for key, entry in ordered.items():
+            mut_from = key[:2]
+            mut_to = key[-1]
+            err.append(error.at[mut_from,mut_to])
         plt.figure(figsize=(30,15))
         plt.errorbar(ordered.keys(), ordered.values(), fmt='o', yerr=err, markersize=10)
         for i in range(0,48,8):
-                print(i)
-                plt.axvspan(i-0.5, i+3.5, facecolor='b', alpha=0.1)
+                plt.axvspan(i-0.5, i+3.5, facecolor='g', alpha=0.1)
         plt.xticks(rotation=90)
-        plt.xticks(fontsize=40, weight = 'bold')
+        plt.xticks(fontsize=40)
         plt.yticks(fontsize=40)
         plt.tight_layout()
         plt.savefig(args.output)
@@ -70,13 +71,16 @@ if __name__=="__main__":
             for j in lst: 
                 if i[0] != j: 
                     dct[f'{i}->{j}'] = mut_matrix.at[i, j]
-                    err.append(error.at[i,j])
-        ordered = OrderedDict(dct)
+        ordered = OrderedDict(sorted(dct.items(), key=lambda x: x[0][0]+x[0][3:]))
+        # finding errors for each 
+        for key, entry in ordered.items():
+            mut_from = key[:2]
+            mut_to = key[-1]
+            err.append(error.at[mut_from,mut_to])
         plt.figure(figsize=(30,15))
         plt.errorbar(ordered.keys(), ordered.values(), fmt='o', yerr=err, markersize=10)
         for i in range(0,48,8):
-                print(i)
-                plt.axvspan(i-0.5, i+3.5, facecolor='b', alpha=0.1)
+                plt.axvspan(i-0.5, i+3.5, facecolor='g', alpha=0.1)
         plt.xticks(rotation=90)
         plt.xticks(fontsize= 40)
         plt.yticks(fontsize=40)
