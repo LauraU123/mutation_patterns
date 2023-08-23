@@ -243,6 +243,7 @@ if __name__=="__main__":
 
     scaled_normalized.to_csv(args.output)
 
-    margin_of_error = np.sqrt(scaled_normalized)/mutation_matrix
+    margin_of_error = scaled_normalized/np.sqrt(np.array(mutation_matrix, dtype=np.float64))
 
     margin_of_error.to_csv(args.margins)
+
