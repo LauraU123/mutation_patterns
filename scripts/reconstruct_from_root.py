@@ -64,10 +64,6 @@ if __name__=="__main__":
             all_sequences[b.name] = "".join(root_sequence) 
 
     for id_, sequence in all_sequences.items():
-        #if id_ in seq_dict_:
-        #    entry = SeqRecord.SeqRecord(Seq.Seq(seq_dict_[id_]), id=id_)
-        #else:
-        print(id_)
         entry = SeqRecord.SeqRecord(Seq.Seq(all_sequences[id_]), id=id_)
         all_entries.append(entry)
 

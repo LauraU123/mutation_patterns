@@ -1,6 +1,7 @@
 import argparse, json
 from Bio import SeqIO
 import pandas as pd
+import numpy as np
 from collections import Counter, defaultdict
 
 
@@ -96,13 +97,11 @@ def mutations_matrix_unscaled(synonymous, reconstructed, which, type_):
     
     if type_ == "point_mut":
         for mutation, nr in all_muts_counter.items(): df.at[mutation[0], mutation[-1]] = int(nr)
-        print(df)
         return(df)  
     else:
         for mutation, count in with_counters.items():
             if 'N' not in mutation:
                 for type, c in count.items():df.at[mutation, type] = c
-        print(df)
         return(df)
 
 
@@ -217,6 +216,7 @@ if __name__=="__main__":
     parser.add_argument('--ref', required=True, type=str, help="reference file, genbank format")
     parser.add_argument('--tree', required=True, type=str, help="Tree json annotated with amino acid and nucleotide mutations")
     parser.add_argument('--output', type=str, help="output CSV file")
+    parser.add_argument('--margins', type=str, help="output CSV file margin of error")
     parser.add_argument('--rsvsubtype', type=str, help="a or b")
     parser.add_argument("--reconstructedseq", type=str, required=True)
     parser.add_argument('--type', type=str, help="type of context of mutation")
@@ -232,6 +232,7 @@ if __name__=="__main__":
     mutation_matrix = mutations_matrix_unscaled(synonymous, args.reconstructedseq, args.rsvsubtype, args.type)
 
     syn_ratio = possible_syn_mut_locations(args.ref)    
+    print(syn_ratio)
 
     scaled_by_ratio_ = scaled_by_ratio(mutation_matrix, syn_ratio)
 
@@ -240,3 +241,8 @@ if __name__=="__main__":
     scaled_normalized = scaled_by_nucleotides_and_normalized(scaled_by_ratio_, syn_mut_count_reference, args.type)
 
     scaled_normalized.to_csv(args.output)
+
+    margin_of_error = scaled_normalized/np.sqrt(np.array(mutation_matrix, dtype=np.float64))
+
+    margin_of_error.to_csv(args.margins)
+
