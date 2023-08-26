@@ -34,12 +34,12 @@ def finding_duplications(nwktree, reconstructeddupl, subtype, which):
         if pd.isna(branch.name) == False:
             if '-' not in seq_dict[branch.name]:
                 first_dupl_sequence = seq_dict[branch.name]
-                print(first_dupl_sequence, branch.name)
+                #print(first_dupl_sequence, branch.name)
                 break  
     for branch in tree_file.get_nonterminals(order='preorder'):
         if pd.isna(branch.name) == False:
                 predupl_sequence = seq_dict[branch.name][int(subtype):]
-                print(predupl_sequence)
+                #print(predupl_sequence)
                 break  
     post_dupl_1 = first_dupl_sequence[:int(subtype)]
     post_dupl_2 = first_dupl_sequence[int(subtype):]
@@ -130,7 +130,7 @@ def dictionary_of_mutations(duplication, mutation_matrix, type_):
 def nonsynonymous(duplication, mutation_matrix, type_):
     translations = {'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'C': ['TGT', 'TGC'], 'W': ['TGG'], 'E': ['GAA', 'GAG'], 'D': ['GAT', 'GAC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'], 'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'N': ['AAT', 'AAC'], 'M': ['ATG'], 'K': ['AAA', 'AAG'], 'Y': ['TAT', 'TAC'], 'I': ['ATT', 'ATC', 'ATA'], 'Q': ['CAA', 'CAG'], 'F': ['TTT', 'TTC'], 'R': ['CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'], 'T': ['ACT', 'ACC', 'ACA', 'ACG'], '*': ['TAA', 'TAG', 'TGA'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'G': ['GGT', 'GGC', 'GGA', 'GGG'], 'H': ['CAT', 'CAC']}
     each_position = dict()
-    print("nonsyn")
+    #print("nonsyn")
     for i, char in enumerate(duplication):
         if i%3 == 0:
             codon = duplication[i:i+3]

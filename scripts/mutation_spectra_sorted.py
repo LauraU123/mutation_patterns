@@ -1,6 +1,7 @@
 import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 from collections import OrderedDict
 
 if __name__=="__main__":
@@ -12,6 +13,12 @@ if __name__=="__main__":
     parser.add_argument('--output', type=str, help="spectra png file")
     parser.add_argument('--rsvsubtype', type=str, help="a or b")
     args = parser.parse_args()
+
+    #sizeOfFont = 25
+    #fontProperties = {'family':'monospace','sans-serif':['Helvetica'],
+    #'weight' : 'normal', 'size' : sizeOfFont}
+    #ticks_font = font_manager.FontProperties(family='monospace', style='normal',
+    #size=sizeOfFont, weight='normal', stretch='normal')
 
     lst = ["A", "C", "G", "T"]
     lst_double = ['AA', 'CA', 'GA', 'TA', 'AC', 'CC', 'GC', 'TC', 'AG', 'CG', 'GG', 'TG' ,'AT', 'CT', 'GT', 'TT']
@@ -34,7 +41,9 @@ if __name__=="__main__":
                 if nuc != nucl: 
                     dct[f'{nuc}->{nucl}'] = mut_matrix.at[nuc, nucl]
                     err.append(error.at[nuc, nucl])
-        plt.errorbar(dct.keys(), dct.values(), fmt='o', yerr= err, markersize=3)
+        plt.errorbar(dct.keys(), dct.values(), fmt='o', yerr= err, markersize=8)
+        #for label in ax.get_xticklabels():
+        #        label.set_fontproperties(ticks_font)
         plt.xticks(rotation=90)
         plt.xticks(fontsize= 20)
         plt.yticks(fontsize=20)
@@ -95,7 +104,7 @@ if __name__=="__main__":
         plt.figure(figsize=(30,15))
         plt.plot(dct.keys(), dct.values(), 'o', markersize=20)
         plt.xticks(rotation=90)
-        plt.xticks(fontsize= 40, weight = 'bold')
+        plt.xticks(fontsize= 40)
         plt.yticks(fontsize=40)
         plt.tight_layout()
         plt.savefig(args.output)
@@ -108,15 +117,19 @@ if __name__=="__main__":
                     if entry[1] == base:dct_for_subtype[entry] = code
             for base_ in lst:
                 dct_for_base = dict()
+                err = []
                 for entry_, code_ in dct_for_subtype.items():
                     if entry_[-1] == base_: 
                         #print(entry_, entry_[-1])
                         dct_for_base[entry_] = code_
-
+                for key, entry in dct_for_base.items():
+                    mut_from = key[:3]
+                    mut_to = key[-1]
+                    err.append(error.at[mut_from,mut_to])
                 plt.figure(figsize=(20,14))
-                plt.plot(dct_for_base.keys(), dct_for_base.values(), 'o', markersize=20)
+                plt.errorbar(dct_for_base.keys(), dct_for_base.values(), fmt='o', yerr=err, markersize=10)
                 plt.xticks(rotation=90)
-                plt.xticks(fontsize= 40, weight = 'bold')
+                plt.xticks(fontsize= 40)
                 plt.yticks(fontsize=40)
                 plt.tight_layout()
                 plt.savefig(args.rsvsubtype + "_before_after" + f"{base}_to_{base_}.png")
